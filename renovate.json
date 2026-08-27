@@ -1,0 +1,37 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "timezone": "Europe/London",
+  "schedule": [
+    "before 6am on Friday"
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": [
+      "before 6am on Friday"
+    ]
+  },
+  "packageRules": [
+    {
+      "matchManagers": [
+        "gradle"
+      ],
+      "groupName": "Gradle dependencies"
+    },
+    {
+      "matchManagers": [
+        "gradle-wrapper",
+        "mise"
+      ],
+      "enabled": false
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "GitHub Actions"
+    }
+  ]
+}

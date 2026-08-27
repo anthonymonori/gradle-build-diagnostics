@@ -1,0 +1,6 @@
+public abstract class me/monori/gradle/builddiagnostics/GradleBuildDiagnosticsSettingsPlugin : org/gradle/api/Plugin {
+	public fun <init> (Lorg/gradle/build/event/BuildEventsListenerRegistry;Lorg/gradle/api/flow/FlowScope;Lorg/gradle/api/flow/FlowProviders;Lorg/gradle/api/logging/LoggingOutput;)V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/initialization/Settings;)V
+}
+

@@ -1,0 +1,58 @@
+plugins {
+    alias(libs.plugins.kotlin.jvm)
+    id 'java-gradle-plugin'
+    id 'me.monori.buildlogic.common-conventions'
+    alias(libs.plugins.binary.compatibility.validator)
+}
+
+group = 'me.monori'
+version = providers.gradleProperty('version').orElse('0.1.0-SNAPSHOT').get()
+
+dependencyLocking {
+    lockAllConfigurations()
+}
+
+gradlePlugin {
+    plugins {
+        buildDiagnostics {
+            id = 'me.monori.gradle-build-diagnostics'
+            implementationClass = 'me.monori.gradle.builddiagnostics.GradleBuildDiagnosticsSettingsPlugin'
+            displayName = 'Gradle Build Diagnostics'
+            description = 'Produces durable local Gradle diagnostic artifacts.'
+        }
+    }
+}
+
+dependencies {
+    compileOnly gradleApi()
+    testImplementation gradleTestKit()
+    testImplementation libs.kotlin.test
+}
+
+def functionalTest = sourceSets.create('functionalTest')
+
+configurations.named(functionalTest.implementationConfigurationName) {
+    extendsFrom configurations.named('testImplementation').get()
+}
+configurations.named(functionalTest.runtimeOnlyConfigurationName) {
+    extendsFrom configurations.named('testRuntimeOnly').get()
+}
+
+def functionalTestTask = tasks.register('functionalTest', Test) {
+    description = 'Runs Gradle TestKit consumer-build tests.'
+    group = 'verification'
+    testClassesDirs = functionalTest.output.classesDirs
+    classpath = functionalTest.runtimeClasspath
+}
+
+tasks.withType(Test).configureEach {
+    systemProperty 'buildDiagnostics.minimumSupportedGradleVersion', providers.gradleProperty('minimumSupportedGradleVersion').get()
+    systemProperty 'buildDiagnostics.currentTestedGradleVersion', providers.gradleProperty('currentTestedGradleVersion').get()
+    testLogging {
+        showStandardStreams = true
+    }
+}
+
+tasks.named('check') {
+    dependsOn functionalTestTask
+}

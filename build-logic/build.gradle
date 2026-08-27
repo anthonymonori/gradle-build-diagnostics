@@ -1,0 +1,17 @@
+plugins {
+    alias(libs.plugins.kotlin.jvm)
+    id 'java-gradle-plugin'
+}
+
+dependencyLocking {
+    lockAllConfigurations()
+}
+
+gradlePlugin {
+    plugins {
+        commonConventions {
+            id = 'me.monori.buildlogic.common-conventions'
+            implementationClass = 'me.monori.buildlogic.CommonConventionPlugin'
+        }
+    }
+}
