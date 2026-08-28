@@ -23,10 +23,6 @@ jobs:
         with:
           gradle-version: ${{ matrix.gradle }}
       - run: gradle check --configuration-cache --no-daemon
-      - name: Verify dependency locks are current
-        run: |
-          gradle dependencies --write-locks --no-daemon
-          git diff --exit-code -- gradle.lockfile build-logic/gradle.lockfile settings-gradle.lockfile
       - uses: actions/upload-artifact@v7
         if: ${{ always() }}
         with:
@@ -35,3 +31,18 @@ jobs:
             build/test-results/**
             build/reports/**
           if-no-files-found: ignore
+
+  dependency-locks:
+    name: Dependency locks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Verify dependency locks are current
+        run: |
+          ./gradlew dependencies --write-locks --no-daemon
+          git diff --exit-code -- gradle.lockfile build-logic/gradle.lockfile settings-gradle.lockfile
