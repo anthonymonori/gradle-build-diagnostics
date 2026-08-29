@@ -7,6 +7,10 @@ dependencyLocking {
     lockAllConfigurations()
 }
 
+dependencies {
+    implementation libs.dokka.gradle.plugin
+}
+
 gradlePlugin {
     plugins {
         commonConventions {

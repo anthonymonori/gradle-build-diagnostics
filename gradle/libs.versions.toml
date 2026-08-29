@@ -1,5 +1,6 @@
 [versions]
 binaryCompatibilityValidator = "0.18.1"
+dokka = "2.2.0"
 kotlin = "2.4.0"
 
 [plugins]
@@ -7,4 +8,5 @@ binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibil
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 
 [libraries]
+dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
