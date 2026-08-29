@@ -45,4 +45,4 @@ jobs:
       - name: Verify dependency locks are current
         run: |
           ./gradlew dependencies --write-locks --no-daemon
-          git diff --exit-code -- gradle.lockfile build-logic/gradle.lockfile settings-gradle.lockfile
+          git diff --exit-code -- gradle.lockfile build-logic/gradle.lockfile build-logic/settings-gradle.lockfile settings-gradle.lockfile
