@@ -2,6 +2,14 @@
 
 Completed tasks are summarized here after their verification gates pass.
 
+## 2026-08-30 — TASK-038
+
+Added and verified the Node GitHub Action for bounded diagnostics summaries and exact-location workflow annotations.
+
+## 2026-08-30 — TASK-027
+
+Published the v1 JSONL schema and canonical event fixture, and verified reader handling for complete, partial, malformed, and future records.
+
 ## 2026-08-27 — TASK-037
 
 Migrated repository settings/build logic scripts to Groovy DSL, retained Kotlin implementations, replaced Kotlin-DSL-only callback syntax with public Gradle APIs, refreshed locks, and passed the complete configuration-cache suite.

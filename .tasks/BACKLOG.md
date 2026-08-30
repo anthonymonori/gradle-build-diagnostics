@@ -1,5 +1,17 @@
 # Backlog
 
+## TASK-039: Reduce duplicate failure-tree diagnostics and stack context
+**Priority:** P2 | **Tags:** diagnostics, usability
+
+Make failure-tree output concise when Gradle supplies both a task wrapper and its underlying cause.
+
+### Plan
+
+- Reproduce the Kotlin/JVM sample's wrapper-and-cause pair in a focused fixture.
+- Preserve the underlying failure while suppressing redundant wrapper entries.
+- Bound useful context before stack-frame noise and verify the readable text artifact improves.
+
+---
 
 ## TASK-034: Add JaCoCo coverage reporting and an initial quality threshold
 **Priority:** P2 | **Tags:** tests, coverage, ci
@@ -50,18 +62,5 @@ Prepare the repository for an initial internal/public release without configurin
 - Add license, changelog, compatibility policy, and contribution/security guidance as appropriate.
 - Add plugin validation, formatting/static-analysis, and dependency/license checks proportionate to this repository.
 - Audit ignored/generated/sensitive files before the first commit and release workflow.
-
----
-
-## TASK-030: Conduct a pre-release consumer dogfood review
-**Priority:** P1 | **Tags:** dogfood, acceptance
-
-Run the plugin against at least two realistic consumer repositories and compare captured artifacts with their raw failures before inviting wider user tests.
-
-### Plan
-
-- Select consumers covering JVM/Kotlin and Android/KMP if available.
-- Capture expected diagnostics, gaps, noise, and redaction observations.
-- Convert findings into explicit follow-up tasks and define initial user-test acceptance criteria.
 
 ---

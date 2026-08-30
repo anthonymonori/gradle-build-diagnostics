@@ -1,0 +1,5 @@
+{"schemaVersion":1,"sequence":1,"timestamp":"2026-08-27T00:00:00Z","eventType":"build_started","runId":"fixture","state":"in_progress"}
+{"schemaVersion":1,"sequence":2,"timestamp":"2026-08-27T00:00:01Z","eventType":"collector_warning","runId":"fixture","reason":"invalid_parser_matcher"}
+{"schemaVersion":1,"sequence":3,"timestamp":"2026-08-27T00:00:02Z","eventType":"task_finished","runId":"fixture","taskPath":":compileKotlin","outcome":"failure"}
+{"schemaVersion":1,"sequence":4,"timestamp":"2026-08-27T00:00:03Z","eventType":"diagnostic","runId":"fixture","severity":"error","category":"compilation","origin":"stderr_parser","message":"Unresolved reference: total","context":["src/main/kotlin/Checkout.kt:42:17","  total","  ^"],"attribution":"exact","fingerprint":"fixture-compilation","truncated":false,"redacted":false,"taskPath":":compileKotlin","location":{"path":"src/main/kotlin/Checkout.kt","line":42,"column":17}}
+{"schemaVersion":1,"sequence":5,"timestamp":"2026-08-27T00:00:04Z","eventType":"build_finished","runId":"fixture","outcome":"failure"}

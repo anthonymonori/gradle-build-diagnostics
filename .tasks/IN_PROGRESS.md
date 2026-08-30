@@ -1,14 +1,14 @@
 # In Progress
 
-## TASK-027: Harden the JSONL schema and reader contract
-**Priority:** P1 | **Tags:** schema, compatibility
+## TASK-030: Conduct a pre-release consumer dogfood review
+**Priority:** P1 | **Tags:** dogfood, acceptance
 
-Make the schema accurately describe every event-specific field, additive-evolution rules, malformed-line handling, and reader expectations.
+Run the plugin against at least two realistic consumer repositories and compare captured artifacts with their raw failures before inviting wider user tests.
 
 ### Plan
 
-- Audit emitted event fields against the current schema and fixtures.
-- Add event-specific schema definitions and golden validation tests.
-- Document partial-file reading and schema evolution rules.
+- Run the checked-in Kotlin/JVM sample and the existing Android and KMP TestKit consumers.
+- Compare their raw build output with the captured artifacts and record gaps or noise.
+- Define what a later external-repository user test must validate.
 
 ---

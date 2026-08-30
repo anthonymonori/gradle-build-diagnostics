@@ -1,5 +1,19 @@
 # Done
 
+## TASK-038: Add GitHub Actions diagnostics summary
+**Priority:** P1 | **Tags:** ci, github-actions, diagnostics
+
+Added a dependency-free Node 24 action that reads the latest v1 run, produces a bounded job summary and outputs, and optionally adds safe exact-location annotations. It requires a matching, contiguous terminal stream before declaring a run complete and renders captured text as plain text. Reader, command-escaping, canonical-fixture, and process-level tests pass; the usage is documented and CI runs the action tests on Node 24.
+
+---
+
+## TASK-027: Harden the JSONL schema and reader contract
+**Priority:** P1 | **Tags:** schema, compatibility
+
+Published the event-specific v1 JSON Schema, canonical all-events fixture, and partial-file/evolution rules. All canonical JSONL lines validate against the published schema, and the companion reader tests malformed, unsupported, interrupted, and terminal record behavior against the same fixture contract.
+
+---
+
 ## TASK-037: Migrate repository build scripts to Groovy DSL
 **Priority:** P1 | **Tags:** build-logic, maintenance
 

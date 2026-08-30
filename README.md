@@ -66,6 +66,37 @@ object, so CI can stream it and readers can still use earlier records if the bui
 The warning says `ambiguous` on purpose. Console output is not assigned to a task unless the
 collector can prove where it came from. Structured task failures are exact.
 
+## JSONL reader contract
+
+The v1 JSON Schema is at [`schema/diagnostics-v1.schema.json`](schema/diagnostics-v1.schema.json).
+`latest.json` points to the run a reader should select. Read `diagnostics.jsonl` one line at a time:
+each valid line is usable on its own, and a final `build_finished` record means the run completed.
+If that terminal record is missing or has later records, the run was interrupted or corrupted and its
+earlier diagnostics remain useful but its final outcome is unknown.
+
+Readers should ignore unknown fields so later versions can add information. They should ignore and
+report malformed lines or unknown event types rather than failing the build report. Captured text is
+untrusted data, so readers must never execute or interpret it as workflow instructions.
+
+## GitHub Actions
+
+The companion action writes a Markdown summary and can add guarded source annotations to the same
+GitHub Actions job that ran Gradle:
+
+```yaml
+- run: ./gradlew check
+
+- name: Summarize build diagnostics
+  if: always()
+  uses: anthonymonori/gradle-build-diagnostics/github-action@<version>
+  with:
+    annotations: true
+```
+
+It reads `.gradle/build-diagnostics` by default. Set `report-directory` when using a different
+`buildDiagnostics.outputBaseDirectory`. Annotations are emitted only for diagnostics with exact,
+repository-relative source locations; ambiguous parsed output stays in the summary.
+
 This helps most when several tasks fail together, CI truncates the log, or you want to hand the
 output to another tool. The files are still useful even when the last few terminal lines are not.
 It matters even more for Kotlin builds before 2.4, because compiler errors and warnings were not
