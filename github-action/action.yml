@@ -1,0 +1,31 @@
+name: Gradle Build Diagnostics
+description: Adds a build-diagnostics summary and optional source annotations to a GitHub Actions job.
+inputs:
+  report-directory:
+    description: Directory configured by buildDiagnostics.outputBaseDirectory.
+    required: false
+    default: .gradle/build-diagnostics
+  annotations:
+    description: Whether to add annotations for exact source locations.
+    required: false
+    default: "false"
+  max-diagnostics:
+    description: Maximum diagnostics shown in the Markdown summary.
+    required: false
+    default: "20"
+  max-annotations:
+    description: Maximum annotations added to the workflow check.
+    required: false
+    default: "10"
+outputs:
+  outcome:
+    description: Outcome recorded by the diagnostics artifact, when available.
+  run-directory:
+    description: Absolute path of the run directory that was read.
+  error-count:
+    description: Number of valid error diagnostics in the selected run.
+  warning-count:
+    description: Number of valid warning diagnostics in the selected run.
+runs:
+  using: node24
+  main: src/main.js

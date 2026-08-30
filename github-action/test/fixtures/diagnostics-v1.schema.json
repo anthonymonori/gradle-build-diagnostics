@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "diagnostics-v1.schema.json",
+  "title": "Gradle Build Diagnostics JSONL v1 record",
+  "description": "One line in diagnostics.jsonl. Unknown fields are allowed for additive evolution.",
+  "oneOf": [
+    { "$ref": "#/$defs/buildStarted" },
+    { "$ref": "#/$defs/diagnostic" },
+    { "$ref": "#/$defs/taskFinished" },
+    { "$ref": "#/$defs/collectorWarning" },
+    { "$ref": "#/$defs/buildFinished" }
+  ],
+  "$defs": {
+    "common": {
+      "type": "object",
+      "required": ["schemaVersion", "sequence", "timestamp", "eventType", "runId"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "sequence": { "type": "integer", "minimum": 1 },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "eventType": { "type": "string" },
+        "runId": { "type": "string", "minLength": 1 }
+      }
+    },
+    "buildStarted": {
+      "allOf": [
+        { "$ref": "#/$defs/common" },
+        {
+          "type": "object",
+          "properties": { "eventType": { "const": "build_started" }, "state": { "const": "in_progress" } },
+          "required": ["state"]
+        }
+      ]
+    },
+    "diagnostic": {
+      "allOf": [
+        { "$ref": "#/$defs/common" },
+        {
+          "type": "object",
+          "properties": {
+            "eventType": { "const": "diagnostic" },
+            "severity": { "enum": ["error", "warning"] },
+            "category": { "type": "string" },
+            "origin": { "type": "string" },
+            "message": { "type": "string" },
+            "context": { "type": "array", "items": { "type": "string" } },
+            "attribution": { "enum": ["exact", "ambiguous", "unknown"] },
+            "fingerprint": { "type": "string" },
+            "truncated": { "type": "boolean" },
+            "redacted": { "type": "boolean" },
+            "taskPath": { "type": "string" },
+            "location": { "$ref": "#/$defs/location" }
+          },
+          "required": ["severity", "category", "origin", "message", "context", "attribution", "fingerprint", "truncated", "redacted"]
+        }
+      ]
+    },
+    "taskFinished": {
+      "allOf": [
+        { "$ref": "#/$defs/common" },
+        {
+          "type": "object",
+          "properties": { "eventType": { "const": "task_finished" }, "taskPath": { "type": "string" }, "outcome": { "enum": ["success", "failure"] } },
+          "required": ["taskPath", "outcome"]
+        }
+      ]
+    },
+    "collectorWarning": {
+      "allOf": [
+        { "$ref": "#/$defs/common" },
+        {
+          "type": "object",
+          "properties": { "eventType": { "const": "collector_warning" }, "reason": { "type": "string" } },
+          "required": ["reason"]
+        }
+      ]
+    },
+    "buildFinished": {
+      "allOf": [
+        { "$ref": "#/$defs/common" },
+        {
+          "type": "object",
+          "properties": { "eventType": { "const": "build_finished" }, "outcome": { "enum": ["success", "failure"] } },
+          "required": ["outcome"]
+        }
+      ]
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "path": { "type": ["string", "null"] },
+        "line": { "type": ["integer", "null"], "minimum": 1 },
+        "column": { "type": ["integer", "null"], "minimum": 1 }
+      }
+    }
+  }
+}
