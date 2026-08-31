@@ -27,6 +27,13 @@ class GoldenFixtureTest {
         assertTrue(fixture("warning").contains("\"attribution\":\"ambiguous\""))
     }
 
+    @Test
+    fun `golden all events fixture contains every v1 event type`() {
+        val fixture = fixture("all-events")
+        listOf("build_started", "collector_warning", "task_finished", "diagnostic", "build_finished")
+            .forEach { eventType -> assertTrue(fixture.contains("\"eventType\":\"$eventType\"")) }
+    }
+
     private fun fixture(name: String): String =
         checkNotNull(javaClass.getResource("/golden/$name.jsonl")) { "Missing golden fixture $name" }.readText()
 }

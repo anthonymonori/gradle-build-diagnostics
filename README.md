@@ -100,3 +100,20 @@ The repository wrapper follows the current release; it is not the minimum versio
 
 Run `./gradlew cleanBuildDiagnostics` to explicitly delete completed run packages beyond the
 retention limit. Ordinary builds never delete diagnostics artifacts.
+
+## GitHub Actions
+
+The companion action adds the build diagnostics to the same GitHub Actions job that runs Gradle:
+
+```yaml
+- run: ./gradlew check
+
+- name: Summarize build diagnostics
+  if: always()
+  uses: anthonymonori/gradle-build-diagnostics/github-action@<version>
+  with:
+    annotations: true
+```
+
+It reads `.gradle/build-diagnostics` by default and writes a short summary to the job page.
+For the available inputs and annotation behavior, see the [GitHub Action README](github-action/README.md).
