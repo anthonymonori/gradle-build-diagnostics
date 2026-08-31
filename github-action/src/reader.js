@@ -42,76 +42,39 @@ export function readJsonl(contents, runDirectory = "", expectedRunId) {
   let malformedLines = 0;
   let unsupportedRecords = 0;
   let trailingRecords = 0;
-  let protocolViolations = 0;
-  let expectedSequence = 1;
-  let streamRunId = expectedRunId;
-  let started = false;
-  let lastEvent;
   let outcome;
+  const stream = createStreamValidator(expectedRunId);
 
-  contents.split(/\r?\n/).forEach((line) => {
-    if (!line.trim()) return;
-    if (lastEvent?.eventType === "build_finished") {
+  for (const line of contents.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    if (stream.isFinished()) {
       trailingRecords += 1;
-      return;
-    }
-    let event;
-    try {
-      event = JSON.parse(line);
-    } catch {
-      malformedLines += 1;
-      return;
+      continue;
     }
 
-    if (event.schemaVersion !== 1) {
+    const record = classifyRecord(line);
+    if (record.type === "malformed") {
+      malformedLines += 1;
+      continue;
+    }
+    if (record.type === "unsupported") {
       unsupportedRecords += 1;
-      return;
-    }
-    if (!hasCommonFields(event)) {
-      malformedLines += 1;
-      return;
-    }
-    if (!EVENT_TYPES.has(event.eventType)) {
-      unsupportedRecords += 1;
-      acceptStreamRecord(event);
-      return;
-    }
-    if (!hasEventFields(event)) {
-      malformedLines += 1;
-      return;
+      if (record.advancesStream) {
+        // Unknown v1 event types still take their place in the sequence. That
+        // keeps an otherwise valid stream readable as new event types are added.
+        stream.accept(record.event);
+      }
+      continue;
     }
 
-    if (!acceptStreamRecord(event)) return;
-
+    const event = record.event;
+    if (!stream.accept(event)) continue;
     if (event.eventType === "diagnostic") diagnostics.push(event);
     if (event.eventType === "collector_warning") warnings.push(event.reason);
     if (event.eventType === "build_finished") outcome = event.outcome;
-  });
-
-  function acceptStreamRecord(event) {
-    if (streamRunId && event.runId !== streamRunId) {
-      protocolViolations += 1;
-      return false;
-    }
-    if (!streamRunId) streamRunId = event.runId;
-    if (!started && event.eventType !== "build_started")
-      protocolViolations += 1;
-    if (event.sequence !== expectedSequence) protocolViolations += 1;
-    expectedSequence = event.sequence + 1;
-    if (event.eventType === "build_started") {
-      if (started) protocolViolations += 1;
-      started = true;
-    }
-
-    lastEvent = event;
-    return true;
   }
 
-  const finished =
-    started &&
-    lastEvent?.eventType === "build_finished" &&
-    trailingRecords === 0 &&
-    protocolViolations === 0;
+  const finished = stream.isComplete(trailingRecords);
   return {
     state: finished ? "complete" : "incomplete",
     runDirectory,
@@ -120,8 +83,70 @@ export function readJsonl(contents, runDirectory = "", expectedRunId) {
     malformedLines,
     unsupportedRecords,
     trailingRecords,
-    protocolViolations,
+    protocolViolations: stream.protocolViolations,
     outcome: finished ? outcome : undefined,
+  };
+}
+
+function classifyRecord(line) {
+  let event;
+  try {
+    event = JSON.parse(line);
+  } catch {
+    return { type: "malformed" };
+  }
+
+  if (!isRecordObject(event)) return { type: "malformed" };
+  if (event.schemaVersion !== 1) return { type: "unsupported" };
+  if (!hasCommonFields(event)) return { type: "malformed" };
+  if (!EVENT_TYPES.has(event.eventType))
+    return { type: "unsupported", event, advancesStream: true };
+  return hasEventFields(event)
+    ? { type: "known", event }
+    : { type: "malformed" };
+}
+
+function createStreamValidator(expectedRunId) {
+  let expectedSequence = 1;
+  let runId = expectedRunId;
+  let started = false;
+  let lastEvent;
+  let protocolViolations = 0;
+  const isFinished = () => lastEvent?.eventType === "build_finished";
+
+  return {
+    get protocolViolations() {
+      return protocolViolations;
+    },
+    isFinished() {
+      return isFinished();
+    },
+    isComplete(trailingRecords) {
+      return (
+        started &&
+        isFinished() &&
+        trailingRecords === 0 &&
+        protocolViolations === 0
+      );
+    },
+    accept(event) {
+      if (runId && event.runId !== runId) {
+        protocolViolations += 1;
+        return false;
+      }
+      if (!runId) runId = event.runId;
+      if (!started && event.eventType !== "build_started")
+        protocolViolations += 1;
+      if (event.sequence !== expectedSequence) protocolViolations += 1;
+      expectedSequence = event.sequence + 1;
+      if (event.eventType === "build_started") {
+        if (started) protocolViolations += 1;
+        started = true;
+      }
+
+      lastEvent = event;
+      return true;
+    },
   };
 }
 
@@ -231,6 +256,10 @@ function hasCommonFields(event) {
   );
 }
 
+function isRecordObject(event) {
+  return event !== null && typeof event === "object" && !Array.isArray(event);
+}
+
 function hasEventFields(event) {
   switch (event.eventType) {
     case "build_started":
@@ -308,6 +337,7 @@ function annotationCommand(diagnostic, workspaceDirectory) {
   const level = diagnostic.severity === "error" ? "error" : "warning";
   const title = escapeWorkflowProperty(`Gradle ${diagnostic.category}`);
   const source = resolve(workspaceDirectory, diagnostic.location.path);
+  // The resolved file must stay inside the GitHub workspace.
   if (!isWithin(resolve(workspaceDirectory), source)) return "";
   return `::${level} ${properties.join(",")},title=${title}::${escapeWorkflowData(diagnostic.message)}`;
 }

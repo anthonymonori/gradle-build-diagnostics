@@ -48,6 +48,16 @@ test("retains valid earlier diagnostics when the final line is malformed", () =>
   assert.match(renderSummary(result, 20), /final outcome is unknown/);
 });
 
+test("treats scalar JSON lines as malformed without crashing", () => {
+  const terminal = { ...finished, sequence: 2 };
+  const result = readJsonl(
+    [JSON.stringify(started), "null", JSON.stringify(terminal)].join("\n"),
+  );
+
+  assert.equal(result.state, "complete");
+  assert.equal(result.malformedLines, 1);
+});
+
 test("does not treat a terminal event with trailing data as complete", () => {
   const result = readJsonl(`${jsonl(started, finished)}\n{not-json`);
 
